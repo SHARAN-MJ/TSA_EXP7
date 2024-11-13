@@ -1,18 +1,12 @@
-
-
-
-
-### Name: A.Sasidharan
-### Register no:212221240049
-### Date:
+## DEVELOPED BY: SHARAN MJ
+## REGISTER NO: 212222240097
+## DATE:
 
 # Ex.No: 07                                       AUTO REGRESSIVE MODEL
 
-
-
-### AIM:
-To Implementat an Auto Regressive Model using Python
-### ALGORITHM:
+## AIM:
+To Implement an Auto Regressive Model using Python
+## ALGORITHM:
 1. Import necessary libraries
 2. Read the CSV file into a DataFrame
 3. Perform Augmented Dickey-Fuller test
@@ -20,109 +14,79 @@ To Implementat an Auto Regressive Model using Python
 5. Plot Partial Autocorrelation Function (PACF) and Autocorrelation Function (ACF)
 6. Make predictions using the AR model.Compare the predictions with the test data
 7. Calculate Mean Squared Error (MSE).Plot the test data and predictions.
-### PROGRAM
-~~~
-
+## PROGRAM
+```python
+import pandas as pd
 import matplotlib.pyplot as plt
 from statsmodels.tsa.ar_model import AutoReg
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 from statsmodels.tsa.stattools import adfuller
 from sklearn.metrics import mean_squared_error
 
-# Load the dataset
-data = pd.read_csv('/content/globaltemper.csv', parse_dates=['dt'], index_col='dt')
+data = pd.read_csv('/content/OnionTimeSeries - Sheet1.csv', parse_dates=['Date'], index_col='Date')
 
-# Assuming 'AverageTemperature' is the column with temperature data
-temperature_data = data['AverageTemperature']
+print(data.head())
 
-# Plot the temperature data
-plt.figure(figsize=(10, 6))
-plt.plot(temperature_data.index, temperature_data, label='Global Temperature Change')  # Plot index vs. values
-plt.title('Global Temperature Change Data')
-plt.xlabel('Date')
-plt.ylabel('Average Temperature')
-plt.legend()
-plt.show()
+result = adfuller(data['Min'])
+print('ADF Statistic:', result[0])
+print('p-value:', result[1])
 
-# Perform ADF test
-adf_result = adfuller(temperature_data)
-print(f'ADF Statistic: {adf_result[0]}')
-print(f'p-value: {adf_result[1]}')
+train_size = int(len(data) * 0.8)
+train, test = data[:train_size], data[train_size:]
 
-# Split data into train and test sets
-train_size = int(len(temperature_data) * 0.8)  # Use temperature_data for length
-train, test = temperature_data.iloc[:train_size], temperature_data.iloc[train_size:]
+model = AutoReg(train['Min'], lags=13)
+model_fit = model.fit()
 
-# Adjust lag order to be less than the number of available data points
-# Reduced lag order to 5 (you might need to experiment with this value)
-lag_order = 5  
+predictions = model_fit.predict(start=len(train), end=len(train) + len(test) - 1, dynamic=False)
 
-# Fit AutoReg model with the adjusted lag order
-model = AutoReg(train, lags=lag_order)  
-model_fitted = model.fit()
+mse = mean_squared_error(test['Min'], predictions)
+print('Mean Squared Error:', mse)
 
-
-# Plot ACF and PACF with adjusted lags
-plt.figure(figsize=(12, 8))
+plt.figure(figsize=(10,6))
 plt.subplot(211)
-plot_acf(temperature_data, lags=len(temperature_data) // 2 -1, ax=plt.gca())  # Use temperature_data for ACF, lags adjusted to be less than or equal to 50% of data length
-plt.title('Autocorrelation Function (ACF)')
-
+plot_pacf(train['Min'], lags=13, ax=plt.gca())
+plt.title("PACF - Partial Autocorrelation Function")
 plt.subplot(212)
-plot_pacf(temperature_data, lags=len(temperature_data) // 2 - 1, ax=plt.gca())  # Use temperature_data for PACF, lags adjusted to be less than or equal to 50% of data length
-plt.title('Partial Autocorrelation Function (PACF)')
-
-
+plot_acf(train['Min'], lags=13, ax=plt.gca())
+plt.title("ACF - Autocorrelation Function")
 plt.tight_layout()
 plt.show()
 
-# Make predictions
-predictions = model_fitted.predict(start=len(train), end=len(train) + len(test) - 1, dynamic=False)
+print("PREDICTION:")
+print(predictions)
 
-# Plot predictions vs. actual test data
-plt.figure(figsize=(10, 6))
-plt.plot(test.index, test, label='Actual Test Data', color='blue')
-plt.plot(test.index, predictions, label='Predicted Data', color='red')
-plt.title('Test Data vs Predictions')
+plt.figure(figsize=(10,6))
+plt.plot(test.index, test['Min'], label='Actual Price')
+plt.plot(test.index, predictions, color='red', label='Predicted Price')
+plt.title('Test Data vs Predictions (FINAL PREDICTION)')
 plt.xlabel('Date')
-plt.ylabel('Average Temperature') 
+plt.ylabel('Minimum Price')
 plt.legend()
 plt.show()
+```
+## OUTPUT:
 
-# Calculate and print MSE
-mse = mean_squared_error(test, predictions)
-print(f'Mean Squared Error: {mse}')
+### GIVEN DATA
+![Screenshot 2024-11-11 113004](https://github.com/user-attachments/assets/b7654498-e236-48d9-a2d4-66055df33b9d)
 
-
-
-# Make final prediction
-final_prediction = model_fitted.predict(start=len(temperature_data), end=len(temperature_data))
-print(f'Final Prediction for Next Time Step: {final_prediction[len(temperature_data)]}')
-
-~~~
-### OUTPUT:
-
-GIVEN DATA
+### ADF-STATISTIC AND P-VALUE
+![Screenshot 2024-11-11 113106](https://github.com/user-attachments/assets/fd0fbbba-17e0-48f1-9602-04699cbe33b5)
 
 
-![image](https://github.com/user-attachments/assets/c8617b19-47f3-417e-bfe3-ad07ca71394c)
+### PACF - ACF
+![Screenshot 2024-11-11 114401](https://github.com/user-attachments/assets/ea24f263-e9c6-4091-b19f-0f3573295972)
+![Screenshot 2024-11-11 114409](https://github.com/user-attachments/assets/8ddba0e4-3d4f-4784-804c-70c23963f93a)
 
+### MSE VALUE
 
-PACF - ACF
+![Screenshot 2024-11-11 113111](https://github.com/user-attachments/assets/4e35a75a-a473-431c-b1fd-d8a162243602)
 
-![image](https://github.com/user-attachments/assets/b1e9c251-e6b9-4202-bc33-a127359d7ac5)
+### PREDICTION
+![Screenshot 2024-11-11 114355](https://github.com/user-attachments/assets/a8c8719c-fa32-4f5d-ba42-84a2388367d1)
 
+### FINAL PREDICTION
 
-PREDICTION
-![image](https://github.com/user-attachments/assets/42156a10-efe6-4f96-986a-6d39de34b97f)
-
-
-
-
-FINIAL PREDICTION
-
-![image](https://github.com/user-attachments/assets/dd91bf0e-1902-4c3d-b959-139938ab9278)
-
+![Screenshot 2024-11-11 114615](https://github.com/user-attachments/assets/1391647e-31c0-4929-a437-0aaeea4622d6)
 
 ### RESULT:
-Thus we have successfully implemented the auto regression function using python.
+Thus, the program to implement the auto regression function using python is executed successfully.
